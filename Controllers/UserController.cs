@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using MyAPI.Data;
 using MyAPI.Models;
@@ -9,55 +10,61 @@ namespace MyAPI.Controllers
   public class UserController : ControllerBase
   {
 
-    DataContextDapper _dapper;
+    private readonly DataContextEF _ef;
+    private readonly IMapper _mapper;
     public UserController(IConfiguration config)
     {
-      _dapper = new DataContextDapper(config);
+      _ef = new DataContextEF(config);
+      this._mapper = new Mapper(new MapperConfiguration(cfg => { cfg.CreateMap<UserEdit, User>(); cfg.CreateMap<UserAdd, User>(); }));
     }
 
-    [HttpGet(Name = "UserFindAll")]
+    [HttpGet]
     public IEnumerable<User> UserFindAll()
     {
-      string sql = "SELECT * FROM \"user\";";
-      IEnumerable<User> users = this._dapper.LoadData<User>(sql);
+      IEnumerable<User> users = this._ef.Users.OrderBy(user => user.Id);
       return users;
     }
 
     [HttpGet("{id}")]
     public User? UserFindById(long id)
     {
-      string sql = $"SELECT * FROM \"user\" WHERE id = {id};";
-      User? user = this._dapper.LoadDataSingle<User?>(sql);
+      User? user = this._ef.Users.Find(id);
       return user;
     }
 
     [HttpPut]
     public IActionResult EditUser(UserEdit user)
     {
-      string sql = $"UPDATE \"user\" SET username = '{user.Username}', email = '{user.Email}', \"password\" = '{user.Password}' WHERE id = {user.Id};";
-      if (this._dapper.ExecuteSql(sql))
+      User userDb = this._mapper.Map<User>(user);
+      this._ef.Update(userDb);
+      if (this._ef.SaveChanges() > 0)
       {
         return Ok();
       }
-      throw new Exception($"Failed to update user with id: {user.Id}");
+      throw new Exception($"Failed to Update User: {user}");
     }
 
     [HttpPost]
     public IActionResult AddUser(UserAdd newUser)
     {
-      string sql = $"INSERT INTO \"user\" (username, email, \"password\") VALUES ('{newUser.Username}', '{newUser.Email}', '{newUser.Password}');";
-      if (this._dapper.ExecuteSql(sql))
+      User userDb = this._mapper.Map<User>(newUser);
+      this._ef.Add(userDb);
+      if (this._ef.SaveChanges() > 0)
       {
         return Ok();
       }
-      throw new Exception($"Failed to create a new new user: {newUser}");
+      throw new Exception($"Failed to Add User: {newUser}");
     }
 
     [HttpDelete]
-    public IActionResult DeleteUser(int id)
+    public IActionResult DeleteUser(long id)
     {
-      string sql = $"UPDATE \"user\" SET ativo = 0 WHERE id = {id} AND ativo = 1;";
-      if (this._dapper.ExecuteSql(sql))
+      User? userDb = this._ef.Users.Find(id);
+      if (userDb != null)
+      {
+        this._ef.Remove(userDb);
+      }
+      if (this._ef.SaveChanges() > 0)
       {
         return Ok();
       }
