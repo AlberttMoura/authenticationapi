@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using MyAPI.Data;
 using MyAPI.Models;
+using MyAPI.Repositories;
 
 namespace MyAPI.Controllers
 {
@@ -9,66 +10,44 @@ namespace MyAPI.Controllers
   [Route("[controller]")]
   public class UserController : ControllerBase
   {
-
-    private readonly DataContextEF _ef;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
-    public UserController(IConfiguration config)
+    public UserController(IConfiguration config, IUserRepository userRepository)
     {
-      _ef = new DataContextEF(config);
+      this._userRepository = userRepository;
       this._mapper = new Mapper(new MapperConfiguration(cfg => { cfg.CreateMap<UserEdit, User>(); cfg.CreateMap<UserAdd, User>(); }));
     }
 
     [HttpGet]
     public IEnumerable<User> UserFindAll()
     {
-      IEnumerable<User> users = this._ef.Users.OrderBy(user => user.Id);
+      IEnumerable<User> users = this._userRepository.FindAll();
       return users;
     }
 
     [HttpGet("{id}")]
     public User? UserFindById(long id)
     {
-      User? user = this._ef.Users.Find(id);
+      User? user = this._userRepository.FindById(id);
       return user;
     }
 
     [HttpPut]
-    public IActionResult EditUser(UserEdit user)
+    public bool EditUser(UserEdit user)
     {
-      User userDb = this._mapper.Map<User>(user);
-      this._ef.Update(userDb);
-      if (this._ef.SaveChanges() > 0)
-      {
-        return Ok();
-      }
-      throw new Exception($"Failed to Update User: {user}");
+      return this._userRepository.Update(this._mapper.Map<User>(user));
     }
 
     [HttpPost]
-    public IActionResult AddUser(UserAdd newUser)
+    public bool AddUser(UserAdd newUser)
     {
-      User userDb = this._mapper.Map<User>(newUser);
-      this._ef.Add(userDb);
-      if (this._ef.SaveChanges() > 0)
-      {
-        return Ok();
-      }
-      throw new Exception($"Failed to Add User: {newUser}");
+      return this._userRepository.Add(this._mapper.Map<User>(newUser));
     }
 
     [HttpDelete]
-    public IActionResult DeleteUser(long id)
+    public bool DeleteUser(long id)
     {
-      User? userDb = this._ef.Users.Find(id);
-      if (userDb != null)
-      {
-        this._ef.Remove(userDb);
-      }
-      if (this._ef.SaveChanges() > 0)
-      {
-        return Ok();
-      }
-      throw new Exception($"Failed to delete user with id: {id}");
+      return this._userRepository.Delete(id);
     }
   }
 }
