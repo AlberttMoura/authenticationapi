@@ -52,5 +52,16 @@ namespace MyAPI.Controllers
       }
       throw new Exception($"Failed to create a new new user: {newUser}");
     }
+
+    [HttpDelete]
+    public IActionResult DeleteUser(int id)
+    {
+      string sql = $"UPDATE \"user\" SET ativo = 0 WHERE id = {id} AND ativo = 1;";
+      if (this._dapper.ExecuteSql(sql))
+      {
+        return Ok();
+      }
+      throw new Exception($"Failed to delete user with id: {id}");
+    }
   }
 }
