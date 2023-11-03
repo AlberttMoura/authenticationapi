@@ -13,11 +13,9 @@ namespace MyAPI.Models
     public string Username { get; set; } = "";
     [Column("email")]
     public string Email { get; set; } = "";
-    [Column("password")]
-    public string Password { get; set; } = "";
     [Column("ativo")]
     public int Ativo { get; set; } = 1;
     [Column("creation_date")]
-    public DateTime CreationDate { get; set; } = DateTime.Now;
+    public DateTime CreationDate { get; set; } = DateTime.UtcNow;
   }
 }
