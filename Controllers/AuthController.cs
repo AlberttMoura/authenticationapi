@@ -1,7 +1,10 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using MyAPI.Data;
 using MyAPI.DTOs;
 using MyAPI.Models;
@@ -65,7 +68,14 @@ namespace MyAPI.Controllers
         }
       }
 
-      return Ok();
+      User? user = this._ef.Users.FirstOrDefault(u => u.Email == userLogin.Email);
+      if (user == null)
+      {
+        return StatusCode(404, "User not found");
+      }
+      return Ok(new Dictionary<string, string> {
+        {"token", this.CreateToken(user.Id)}
+      });
     }
 
     private byte[] GetPasswordHash(string password, byte[] passwordSalt)
@@ -79,6 +89,30 @@ namespace MyAPI.Controllers
         numBytesRequested: 256 / 8
       );
       return passWordHash;
+    }
+
+    private string CreateToken(long userId)
+    {
+      Claim[] claims = new Claim[] {
+        new("userId", userId.ToString())
+      };
+
+      SymmetricSecurityKey tokenKey = new(Encoding.UTF8.GetBytes(this._config.GetSection("Appsettings:TokenKey").Value ?? ""));
+
+      SigningCredentials credentials = new(tokenKey, SecurityAlgorithms.HmacSha512Signature);
+
+      SecurityTokenDescriptor descriptor = new()
+      {
+        Subject = new ClaimsIdentity(claims),
+        SigningCredentials = credentials,
+        Expires = DateTime.UtcNow.AddMinutes(4)
+      };
+
+      JwtSecurityTokenHandler tokenHandler = new();
+
+      SecurityToken token = tokenHandler.CreateToken(descriptor);
+
+      return tokenHandler.WriteToken(token);
     }
   }
 }
