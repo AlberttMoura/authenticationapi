@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyAPI.Data;
 using MyAPI.DTOs;
@@ -7,6 +8,7 @@ using MyAPI.Repositories;
 
 namespace MyAPI.Controllers
 {
+  [Authorize]
   [ApiController]
   [Route("[controller]")]
   public class UserController : ControllerBase
