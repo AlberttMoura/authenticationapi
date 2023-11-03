@@ -13,6 +13,7 @@ namespace MyAPI.Data
 
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Auth> Auth { get; set; }
+    public virtual DbSet<Post> Posts { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

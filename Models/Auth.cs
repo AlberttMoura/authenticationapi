@@ -4,14 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace MyAPI.Models
 {
   [Table("auth")]
-  public class Auth
+  public partial class Auth
   {
     [Key]
-    [Column("email")]
+    [Column("user_email")]
     public string Email { get; set; } = "";
-    [Column("password_hash")]
+    [Column("auth_password_hash")]
     public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
-    [Column("password_salt")]
+    [Column("auth_password_salt")]
     public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
   }
 }

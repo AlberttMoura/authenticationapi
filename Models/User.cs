@@ -7,15 +7,16 @@ namespace MyAPI.Models
   public partial class User
   {
     [Key]
-    [Column("id")]
+    [Column("user_id")]
     public long Id { get; set; }
-    [Column("username")]
+    [Column("user_nick")]
     public string Username { get; set; } = "";
-    [Column("email")]
+    [Column("user_email")]
     public string Email { get; set; } = "";
-    [Column("ativo")]
+    [Column("user_ativo")]
     public int Ativo { get; set; } = 1;
-    [Column("creation_date")]
+    [Editable(false)]
+    [Column("user_creation_date")]
     public DateTime CreationDate { get; set; } = DateTime.UtcNow;
   }
 }

@@ -1,7 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using MyAPI.Repositories;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,35 @@ builder.Services.AddCors((options) =>
                 corsBuilder.WithOrigins("127.0.0.1").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
             });
     });
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Standard Authorization header",
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        BearerFormat = "JWT",
+        Scheme = "Bearer",
+        Type = SecuritySchemeType.Http
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+});
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
