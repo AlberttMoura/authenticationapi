@@ -8,7 +8,6 @@ namespace MyAPI.Models
   {
     [Key]
     [Column("id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
     [Column("username")]
     public string Username { get; set; } = "";
@@ -18,5 +17,7 @@ namespace MyAPI.Models
     public string Password { get; set; } = "";
     [Column("ativo")]
     public int Ativo { get; set; } = 1;
+    [Column("creation_date")]
+    public DateTime CreationDate { get; set; } = DateTime.Now;
   }
 }
