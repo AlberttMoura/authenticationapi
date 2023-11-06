@@ -27,10 +27,11 @@ namespace MyAPI.Helpers
       return passWordHash;
     }
 
-    public string CreateToken(long userId)
+    public string CreateToken(long userId, string role)
     {
       Claim[] claims = new Claim[] {
-        new("userId", userId.ToString())
+        new("userId", userId.ToString()),
+        new("role", role)
       };
 
       SymmetricSecurityKey tokenKey = new(Encoding.UTF8.GetBytes(this._config.GetSection("AppSettings:TokenKey").Value ?? ""));

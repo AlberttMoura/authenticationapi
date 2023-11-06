@@ -1,7 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyAPI.Data;
 using MyAPI.DTOs;
 using MyAPI.Models;
 using MyAPI.Repositories;

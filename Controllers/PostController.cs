@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyAPI.Data;
 using MyAPI.DTOs;
 using MyAPI.Models;
 using MyAPI.Repositories;
@@ -49,16 +48,16 @@ namespace MyAPI.Controllers
       });
     }
 
+    [Authorize(Roles = "Administrator")]
     [HttpDelete]
     public bool PostDelete(long postId)
     {
       Post? post = this._postRepository.FindById(postId);
-      long userId = long.Parse(User.FindFirst("userId")?.Value ?? throw new Exception("User Id could not be found"));
-      if (post != null && post.UserId == userId)
+      if (post != null)
       {
         return this._postRepository.Delete(postId);
       }
-      throw new Exception("You don't have permission to delete this post");
+      throw new Exception("This post doesn't exist");
     }
 
     [HttpPut]

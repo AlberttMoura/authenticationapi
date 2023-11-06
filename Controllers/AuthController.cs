@@ -54,7 +54,7 @@ namespace MyAPI.Controllers
     [HttpPost("Login")]
     public IActionResult Login(UserLogin userLogin)
     {
-      Auth? existingAuth = this._ef.Auth.FirstOrDefault(a => a.Email == userLogin.Email) ?? throw new Exception("User doesn't exist");
+      Auth existingAuth = this._ef.Auth.FirstOrDefault(a => a.Email == userLogin.Email) ?? throw new Exception("User not registered");
 
       byte[] passwordHash = this._authHelper.GetPasswordHash(userLogin.Password, existingAuth.PasswordSalt);
 
@@ -66,13 +66,10 @@ namespace MyAPI.Controllers
         }
       }
 
-      User? user = this._ef.Users.FirstOrDefault(u => u.Email == userLogin.Email);
-      if (user == null)
-      {
-        return StatusCode(404, "User not found");
-      }
+      User user = this._ef.Users.FirstOrDefault(u => u.Email == userLogin.Email) ?? throw new Exception("User could not be found");
+
       return Ok(new Dictionary<string, string> {
-        {"token", this._authHelper.CreateToken(user.Id)}
+        {"token", this._authHelper.CreateToken(user.Id, existingAuth.Role)}
       });
     }
 
@@ -80,8 +77,9 @@ namespace MyAPI.Controllers
     public string RefreshToken()
     {
       string userId = User.FindFirst("userId")?.Value ?? throw new Exception("User Id could not be found");
-      User? user = this._ef.Users.Find(long.Parse(userId)) ?? throw new Exception("erro");
-      return this._authHelper.CreateToken(user.Id);
+      User user = this._ef.Users.Find(long.Parse(userId)) ?? throw new Exception("User could not be found");
+      Auth auth = this._ef.Auth.FirstOrDefault(a => a.Email == user.Email) ?? throw new Exception("User not registered");
+      return this._authHelper.CreateToken(user.Id, auth.Role);
     }
   }
 }

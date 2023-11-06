@@ -13,5 +13,7 @@ namespace MyAPI.Models
     public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
     [Column("auth_password_salt")]
     public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
+    [Column("auth_role")]
+    public string Role { get; set; } = "Common";
   }
 }
