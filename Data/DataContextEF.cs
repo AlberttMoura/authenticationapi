@@ -19,10 +19,8 @@ namespace MyAPI.Data
     {
       if (!optionsBuilder.IsConfigured)
       {
-        optionsBuilder.UseNpgsql(this._config.GetConnectionString("DefaultConnection"),
-          optionsBuilder => optionsBuilder.EnableRetryOnFailure());
+        optionsBuilder.UseSqlite(this._config.GetConnectionString("DefaultConnection"));
       }
     }
-
   }
 }
